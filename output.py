@@ -5,7 +5,7 @@ from vec3 import Color
 def write_color(pixel_color: Color, samples_per_pixel):
     color_count = 256
     scale = 1 / samples_per_pixel
-    gamma = 0.5
+    gamma = 1
     r = (pixel_color.x() * scale) ** gamma
     g = (pixel_color.y() * scale) ** gamma
     b = (pixel_color.z() * scale) ** gamma
