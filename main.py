@@ -3,12 +3,10 @@
 # Press ⌃R to execute it or replace it with your code.
 # Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
 
-
-
-# Press the green button in the gutter to run the script.
 import math
 
 import output
+from light import Light
 from ray import Ray
 from sphere import Sphere
 from vec3 import Color, Point3, Vec3
@@ -31,9 +29,15 @@ if __name__ == '__main__':
     vertical = Vec3(0, viewport_height, 0)
     lower_left_corner = origin - horizontal.scalar_multiply(0.5) - vertical.scalar_multiply(0.5) - Vec3(0, 0, focal_length)
 
+    # Lights
+
+    light1 = Light(Vec3(0.5, 0.4, 1.0), Point3(2, 2, -1))
+    light2 = Light(Vec3(0.3, 0.7, 0.9), Point3(-5, -2, -1))
+    lights = [light2]
+
     # Objects
 
-    sphere_1 = Sphere(1 / math.sqrt(2), Point3(0, 0, -1))
+    sphere_1 = Sphere(1 / math.sqrt(2), Point3(0, 0, -1), Color(1.0, 1.0, 1.0))
 
     print("P3\n{0} {1} \n255\n".format(image_width, image_height))
 
@@ -47,9 +51,9 @@ if __name__ == '__main__':
 
             samples_per_pixel = 1
 
-            tmp = lower_left_corner + horizontal.scalar_multiply(u) + vertical.scalar_multiply(v)
-            if sphere_1.hit(r_in, 0, math.inf) is not None:
-                pixel_color = Color(1, 1, 1)
+            tmp = sphere_1.hit(r_in, 0, math.inf, lights)
+            if tmp is not None and len(tmp) == 3:
+                pixel_color = sphere_1.color * tmp[2]
             output.write_color(pixel_color, samples_per_pixel)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
