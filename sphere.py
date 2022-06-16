@@ -14,38 +14,39 @@ class Sphere(RigidBody):
         self.color = col
 
     def hit(self, r_in: Ray, tmin, tmax, lights=None):
-        a = Vec3.dot(r_in.direction, r_in.direction)
-        half_b = Vec3.dot(r_in.origin - self.center, r_in.direction)
-        c = Vec3.dot(r_in.origin - self.center, r_in.origin - self.center) - self.radius ** 2
+        cur = tmin
 
-        disc = half_b * half_b - a * c
-        if disc >= 0:
-            disc_sqrt = math.sqrt(disc)
-        else:
+        r_in.direction = r_in.direction.unit_vector()
+        if Vec3.dot(r_in.origin - self.center, r_in.origin - self.center) - self.radius ** 2 > 0:
+            tmax_possible = math.sqrt(Vec3.dot(r_in.origin - self.center, r_in.origin - self.center) - self.radius ** 2)
+            tmax = min(tmax, tmax_possible)
+
+        encounter = False
+
+        while cur <= tmax:
+            if self.signed_distance_function(r_in.at(cur)) <= 1e-8:
+                encounter = True
+                break
+            else:
+                cur += 1e-2
+
+        if not encounter:
             return None
 
-        solution = [(-half_b - disc_sqrt) / a, (-half_b + disc_sqrt) / a]
-        if tmin <= solution[0] <= tmax:
-            solution = solution[0]
-        elif tmin <= solution[1] <= tmax:
-            solution = solution[1]
-        else:
-            return None
-
-        intersection = r_in.origin + r_in.direction.scalar_multiply(solution)
+        intersection = r_in.at(cur)
         normal = self.compute_normal(intersection)
 
         if not lights:
-            return [solution, normal]
+            return [cur, intersection, normal]
 
-        light_intensity = Color(1.0, 0.3, 0.2)
+        light_intensity = Color(.3, 0.3, 0.2)
         for light in lights:
             light_intensity += light.intensity.scalar_multiply(max(0, Vec3.dot(normal, (light.position - intersection).unit_vector())))
 
-        return [solution, normal, light_intensity]
+        return [cur, intersection, normal, light_intensity]
 
     def signed_distance_function(self, pt):
-        return Vec3.dot(pt, pt)
+        return math.sqrt(Vec3.dot(pt - self.center, pt - self.center)) - self.radius - Sphere.sine_noise(pt)
 
     def compute_normal(self, pt: Point3):
         eps = 1e-4
@@ -56,3 +57,12 @@ class Sphere(RigidBody):
         dz = self.signed_distance_function(pt + Vec3(0, 0, eps)) - tmp
 
         return Vec3(dx, dy, dz).unit_vector()
+
+    @staticmethod
+    def sine_noise(pt: Point3):
+        res = 1
+
+        for i in range(3):
+            res *= 0.4 * math.sin(48 * pt.element[i])
+
+        return res

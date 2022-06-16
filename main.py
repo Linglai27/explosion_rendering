@@ -52,8 +52,9 @@ if __name__ == '__main__':
             samples_per_pixel = 1
 
             tmp = sphere_1.hit(r_in, 0, math.inf, lights)
-            if tmp is not None and len(tmp) == 3:
-                pixel_color = sphere_1.color * tmp[2]
+            if tmp is not None and len(tmp) == 4:
+                noise = math.sin(1200 * tmp[1].x()) * math.cos(480 * tmp[1].y()) * math.sin(720 * tmp[1].z())
+                pixel_color = sphere_1.color * tmp[3]
             output.write_color(pixel_color, samples_per_pixel)
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
