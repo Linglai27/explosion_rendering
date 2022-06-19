@@ -19,6 +19,8 @@ class ValueNoise2D:
         for k in range(k_max_vertices):
             w = random.randint(0, k_max_vertices - 1)
             self.permutation_table[w], self.permutation_table[k] = self.permutation_table[k], self.permutation_table[w]
+
+        for k in range(k_max_vertices):
             self.permutation_table[k_max_vertices + k] = self.permutation_table[k]
 
     def eval(self, t: Vec3):
@@ -64,10 +66,12 @@ samples_per_pixel = 1
 pixel_storage = []
 
 noise = ValueNoise2D(256)
-"""print(noise.r)
-print(noise.eval(Vec3(1.5, 1.5, 0)))"""
 
-print("P3\n{0} {1} \n255\n".format(image_width, image_height))
+output_file = open("noise.ppm", "w+")
+begin_txt = "P3\n{0} {1} \n255\n".format(image_width, image_height)
+
+print(begin_txt)
+output_file.write(begin_txt)
 
 num_layer = 5
 max_noise_val = 0
@@ -98,4 +102,6 @@ for j in range(image_height - 1, - 1, - 1):
     for i in range(image_width):
         noise_val = pixel_storage[cur_index]
         cur_index += 1
-        output.write_color(Vec3(noise_val / max_noise_val, noise_val / max_noise_val, noise_val /max_noise_val), samples_per_pixel)
+        output.write_color(output_file, Vec3(noise_val / max_noise_val, noise_val / max_noise_val, noise_val /max_noise_val), samples_per_pixel)
+
+output_file.close()

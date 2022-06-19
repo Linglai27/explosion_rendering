@@ -39,7 +39,9 @@ if __name__ == '__main__':
 
     sphere_1 = Sphere(1 / math.sqrt(2), Point3(0, 0, -1), Color(1.0, 1.0, 1.0))
 
-    print("P3\n{0} {1} \n255\n".format(image_width, image_height))
+    output_file = open("output.ppm", "w+")
+    begin_txt = "P3\n{0} {1} \n255\n".format(image_width, image_height)
+    print(begin_txt)
 
     for j in range(image_height - 1, - 1, - 1):
         for i in range(image_width):
@@ -55,6 +57,8 @@ if __name__ == '__main__':
             if tmp is not None and len(tmp) == 4:
                 noise = math.sin(1200 * tmp[1].x()) * math.cos(480 * tmp[1].y()) * math.sin(720 * tmp[1].z())
                 pixel_color = sphere_1.color * tmp[3]
-            output.write_color(pixel_color, samples_per_pixel)
+            output.write_color(output_file, pixel_color, samples_per_pixel)
+
+    output_file.close()
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
